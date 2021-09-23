@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="stylesheet" href="./bootstrap-4.3.1-dist/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <title>Download a web log data :)</title>
+  <style>
+    body{
+      width: 330px;
+    }
+  </style>
+</head>
+<body>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Download a web log data :)</h5>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <p class="card-text" id="message">No message</p>
+                    <a id="saveJson" rel="application/json" class="m-1 btn btn-info disabled btn-block" role="button">Download AS JSON</a>
+                    <a id="saveMarkdown" class="m-1 btn btn-outline-secondary btn-block disabled" role="button">Download AS MARKDOWN</a> 
+                </li>
+                <li class="list-group-item">
+                    <p class="card-text">Transform JSON to MARKDOWN</p>
+                    <input id="file" name="file" type="file" disabled />
+                    <a id="transform" class="m-1 btn btn-outline-info btn-block disabled" role="button">Transform and Donwnload</a>
+                </li>
+            </ul>            
+        </div>
+    </div>
+  <script src='./jquery/jquery-3.6.0.min.js'></script>
+  <script src="popup.js"></script>
+  <script src="./bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+</body>
+</html>

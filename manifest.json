@@ -1,0 +1,26 @@
+{
+  "name": "Recording & making records for a web map",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "Chrome Extension for recording web history to create a map. Useful for an obsidian mind map",
+  "browser_action":{
+    "default_icon": {
+      "16": "icons/hon16.png"
+    },
+    "default_title":"Download a web log data :)",
+    "default_popup":"popup.html"
+  },
+  "permissions": ["storage"],
+  "content_scripts": [{
+    "matches": ["*://*/*"],
+    "js": [
+      "jquery/jquery-3.6.0.min.js",
+      "main.js"
+    ]
+  }],
+  "author": "Mai :)",
+  "icons": {
+    "16": "icons/hon16.png",
+    "48": "icons/hon48.png"
+  }
+}
