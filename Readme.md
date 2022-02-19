@@ -2,6 +2,7 @@
 
 To record your web history as a hierarchical structure.
 Markdown file is for opening in the Obsidian Mind Map.
+![Screen Shot 2022-02-20 at 12 31 25](https://user-images.githubusercontent.com/36495540/154823116-f6ce2754-05a5-44c3-b1d6-47a50bf29ead.png)
 
 
 ### How to set up
@@ -14,6 +15,9 @@ Markdown file is for opening in the Obsidian Mind Map.
 6. Pin the plugin in the toolbar
 
 Once you enaled the plugin, the plugin starts to log your web history.
+
+![Screen Shot 2022-02-20 at 12 53 20](https://user-images.githubusercontent.com/36495540/154823128-d628a6af-f385-4a17-8355-c845e40a0de3.png)
+
 There is no log available, all buttons are disabled.
 
 Download AS JsonLog is a log as a JSON format without a hierarchical structure.
