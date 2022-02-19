@@ -1,23 +1,70 @@
-$(document).ready(async function(){ 
+$(document).ready(function(){ 
     loadData();
     //When the save button clicked
     $('#saveJson').on('click', function(){
-        //chrome.storage.local.remove(['honeyIndex'], function() {});
-        //chrome.storage.local.remove(['honeyLog'], function() {});
-        //chrome.storage.local.remove(['logArray'], function() {});
+        /*chrome.storage.local.remove(['honeyIndex'], function() {});
+        chrome.storage.local.remove(['honeyLog'], function() {});
+        chrome.storage.local.remove(['logArray'], function() {});*/
         $('#message').text("Download Json is successful");
         $('#saveJson').addClass('disabled');
         return true;
     });
     $('#saveMarkdown').on('click', function(){
-        //chrome.storage.local.remove(['honeyIndex'], function() {});
-        //chrome.storage.local.remove(['honeyLog'], function() {});
-        //chrome.storage.local.remove(['logArray'], function() {});
+        /*chrome.storage.local.remove(['honeyIndex'], function() {});
+        chrome.storage.local.remove(['honeyLog'], function() {});
+        chrome.storage.local.remove(['logArray'], function() {});*/
         $('#message').text("Download MarkDown is successful");
         $('#saveMarkdown').addClass('disabled');
         return true;
     });
+    $('#clearLog').on('click', function(){
+        chrome.storage.local.remove(['honeyIndex'], function() {});
+        chrome.storage.local.remove(['honeyLog'], function() {});
+        chrome.storage.local.remove(['logArray'], function() {});
+        $('#message').text("Clearing history is successful");
+        $('#clearLog').addClass('disabled');
+        return true;
+    });
+    $('#transform').on('click', function(){
+        $('#message2').text("Transform JSON and Download MarkDown is successful");
+        $('#transform').addClass('disabled');
+        return true;
+    });
+
+    const input = document.querySelector('input');
+    input.addEventListener('change', transformFile);
 });
+
+const transformFile = () => {
+    const curFiles = document.querySelector('input').files;
+    if(curFiles.length > 0) {
+        let storageLog ="";
+
+        let reader = new FileReader();
+        reader.onload = function(event) {
+           storageLog =  event.target.result;
+           if(storageLog){
+            $('#message2').text("Transform and Download is availale!");
+
+            // saveMarkdown Button
+            let objLogJson = getJsonParentChild(storageLog);
+            let strLogJosn = JSON.stringify(objLogJson)
+            let logMd = getMarkdown(strLogJosn);
+            let blobMD = new Blob([logMd], {type : 'text/plain'});
+            $('#transform').attr({
+                'href' : window.URL.createObjectURL(blobMD),
+                'download' : "log-" + getDate() +".md"
+            });
+            $('#transform').removeClass('disabled');
+        }else{
+            $('#transform').text("File is empty");
+        }
+        };
+        reader.readAsText(curFiles[0]);
+    }
+}
+
+
 
 const getDate = () =>{
     // get date
@@ -43,17 +90,17 @@ const loadData =() =>{
         }else{
             $('#message').text("Log is availale to download!");
 
-
-            let objLogJson = getJsonParentChild(storageLog);
-            let strLogJosn = JSON.stringify(objLogJson)
-            let blobJson = new Blob([strLogJosn], {type : 'application/json'});
-            //let blobJson = new Blob([storageLog], {type : 'application/json'});
+            // saveJson Button
+            let blobJson = new Blob([storageLog], {type : 'application/json'});
             $('#saveJson').attr({
                 'href' : window.URL.createObjectURL(blobJson),
                 'download' : "log-" + getDate() +".json"
             });
             $('#saveJson').removeClass('disabled');
 
+            // saveMarkdown Button
+            let objLogJson = getJsonParentChild(storageLog);
+            let strLogJosn = JSON.stringify(objLogJson)
             let logMd = getMarkdown(strLogJosn);
             let blobMD = new Blob([logMd], {type : 'text/plain'});
             $('#saveMarkdown').attr({
@@ -61,17 +108,18 @@ const loadData =() =>{
                 'download' : "log-" + getDate() +".md"
             });
             $('#saveMarkdown').removeClass('disabled');
+
+            // clearLog Button
+            $('#clearLog').removeClass('disabled');
         }
     });
 }
 
-// 入れ子構造を作る
+// formatting json to parent / child
 const getJsonParentChild = (storageLog) => {
     let arrayLog = JSON.parse(storageLog);
     let arrayResult = [];
 
-    console.log(arrayLog);
-    
     // loop per date
     arrayLog.forEach(function (value, index, data) {
         let strDate = value.date;
@@ -129,12 +177,8 @@ const seachChild = (objLog, intId) => {
     return result;
 }
 
-
-
 const getMarkdown = (storageLog) =>{
     let objLog = JSON.parse(storageLog);
-    // count dates
-
     let strOutput = "";
     // loop by date
     objLog.forEach(function (value, index, data) {
@@ -142,24 +186,19 @@ const getMarkdown = (storageLog) =>{
         let arrayLogs = value.log;
         strOutput = strOutput + getMDformat(strDate, 1);
         arrayLogs.forEach(function (log, index, data){
-            console.log("log.title" + log.title);
-            console.log("log.step" + log.step);
             strOutput = strOutput + getMDformat(log.title, log.step, log);
         });
    });
-   console.log("aaaaaaaaa");
-   console.log(strOutput);
     return strOutput;
 }
+
 const getMDformat = (strTitle, intStep, objLog) =>{ // title, step, object
     const strSharp = "#";
     let strPrefix = "";
     let strOutput = "";
-    console.log("intStep" + intStep);
     for (var i = 0; i < intStep; i++){
         strPrefix = strPrefix + strSharp;
     }
-    console.log("strPrefix" + strPrefix);
     if(typeof objLog === 'undefined'){
         strOutput = strPrefix + " " + strTitle + "\n";
     }else{
@@ -169,7 +208,6 @@ const getMDformat = (strTitle, intStep, objLog) =>{ // title, step, object
             arrayChildLog.forEach(function (log, index, data){
                 strOutput = strOutput + getMDformat(log.title, log.step, log);
             });
-            
         }
     }
     return strOutput;

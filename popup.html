@@ -18,12 +18,14 @@
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     <p class="card-text" id="message">No message</p>
-                    <a id="saveJson" rel="application/json" class="m-1 btn btn-outline-info disabled btn-block" role="button">Download AS JSON</a>
+                    <a id="saveJson" rel="application/json" class="m-1 btn btn-outline-info disabled btn-block" role="button">Download AS JSONLog</a>
                     <a id="saveMarkdown" class="m-1 btn btn-outline-secondary btn-block disabled" role="button">Download AS MARKDOWN</a> 
+                    <a id="clearLog" class="m-1 btn btn-warning btn-block disabled" role="button">Clear web log history</a> 
                 </li>
                 <li class="list-group-item">
                     <p class="card-text">Transform JSON to MARKDOWN</p>
-                    <input id="file" name="file" type="file" disabled />
+                    <p class="card-text" id="message2"></p>
+                    <input id="file" name="file" type="file" accept="application/JSON"/>
                     <a id="transform" class="m-1 btn btn-outline-info btn-block disabled" role="button">Transform and Donwnload</a>
                 </li>
             </ul>            
