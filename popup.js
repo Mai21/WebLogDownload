@@ -2,9 +2,9 @@ $(document).ready(async function(){
     loadData();
     //When the save button clicked
     $('#saveJson').on('click', function(){
-        chrome.storage.local.remove(['honeyIndex'], function() {});
-        chrome.storage.local.remove(['honeyLog'], function() {});
-        chrome.storage.local.remove(['logArray'], function() {});
+        //chrome.storage.local.remove(['honeyIndex'], function() {});
+        //chrome.storage.local.remove(['honeyLog'], function() {});
+        //chrome.storage.local.remove(['logArray'], function() {});
         $('#message').text("Download Json is successful");
         $('#saveJson').addClass('disabled');
         return true;
@@ -24,7 +24,7 @@ const getDate = () =>{
     let roadTime = new Date();
     let strDatetime= 'YYYY-MM-DD_hh:mm:ss';
     strDatetime = strDatetime.replace(/YYYY/g, roadTime.getFullYear());
-    strDatetime = strDatetime.replace(/MM/g, (roadTime.getMonth() < 10) ? ("0" + (roadTime.getMonth() + 1)) : (roadTime.getMonth() + 1));
+    strDatetime = strDatetime.replace(/MM/g, (roadTime.getMonth() < 9) ? ("0" + (roadTime.getMonth() + 1)) : (roadTime.getMonth() + 1));
     strDatetime = strDatetime.replace(/DD/g, (roadTime.getDate() <  10) ? ("0" + roadTime.getDate()) : roadTime.getDate());
     strDatetime = strDatetime.replace(/hh/g, (roadTime.getHours() <  10) ? ("0" + roadTime.getHours()) : roadTime.getHours());
     strDatetime = strDatetime.replace(/mm/g, (roadTime.getMinutes() <  10) ? ("0" + roadTime.getMinutes()) : roadTime.getMinutes());
@@ -43,14 +43,18 @@ const loadData =() =>{
         }else{
             $('#message').text("Log is availale to download!");
 
-            let blobJson = new Blob([storageLog], {type : 'application/json'});
+
+            let objLogJson = getJsonParentChild(storageLog);
+            let strLogJosn = JSON.stringify(objLogJson)
+            let blobJson = new Blob([strLogJosn], {type : 'application/json'});
+            //let blobJson = new Blob([storageLog], {type : 'application/json'});
             $('#saveJson').attr({
                 'href' : window.URL.createObjectURL(blobJson),
                 'download' : "log-" + getDate() +".json"
             });
             $('#saveJson').removeClass('disabled');
 
-            let logMd = getMarkdown(storageLog);
+            let logMd = getMarkdown(strLogJosn);
             let blobMD = new Blob([logMd], {type : 'text/plain'});
             $('#saveMarkdown').attr({
                 'href' : window.URL.createObjectURL(blobMD),
@@ -60,6 +64,72 @@ const loadData =() =>{
         }
     });
 }
+
+// 入れ子構造を作る
+const getJsonParentChild = (storageLog) => {
+    let arrayLog = JSON.parse(storageLog);
+    let arrayResult = [];
+
+    console.log(arrayLog);
+    
+    // loop per date
+    arrayLog.forEach(function (value, index, data) {
+        let strDate = value.date;
+        let arrayLogs = value.log;
+        arrayResult.push({"date" : strDate, "log" : getChildJson(arrayLogs)});
+    });
+
+    return arrayResult;
+}
+
+const getChildJson = (totalArray, childLogsArray, step) =>{ // wholeArray, childArray step
+    let arrayLogs = [];
+    let newChildArray = [];
+    let resultChildArray = [];
+    if(typeof childLogsArray === 'undefined'){ // if no childArray, loop for wholeArray
+        arrayLogs = totalArray;
+    }else{
+        arrayLogs = childLogsArray;
+    }
+
+    arrayLogs.forEach(function (log, index, data){
+        
+        let objLog = {
+            title : log.title,
+            url : log.url,
+            id : log.id
+        }
+        
+        if (log.parentPageId === null && log.parentPageId !== log.id){ // sometimes there is a record having parentpageid = id
+            objLog.step = 2;
+        }else{
+            if(typeof childLogsArray !== 'undefined'){
+                objLog.step = step;
+            }
+        }
+
+        if (typeof objLog.step !== 'undefined'){
+            newChildArray = seachChild(totalArray, log.id);
+            if (newChildArray !== null){
+                const result = getChildJson(totalArray,newChildArray, objLog.step + 1);
+                if (result.length > 0) {
+                    objLog.child = result;
+                }
+            }
+            resultChildArray.push(objLog);
+        }
+        
+    });
+    return resultChildArray;
+}
+
+// search child with own id
+const seachChild = (objLog, intId) => {
+    const result = objLog.filter( ({ parentPageId }) => parentPageId === intId );
+    return result;
+}
+
+
 
 const getMarkdown = (storageLog) =>{
     let objLog = JSON.parse(storageLog);
@@ -72,44 +142,35 @@ const getMarkdown = (storageLog) =>{
         let arrayLogs = value.log;
         strOutput = strOutput + getMDformat(strDate, 1);
         arrayLogs.forEach(function (log, index, data){
-            strOutput = strOutput + getMDformat(log.title, 2, log.url);
-            /*if(log.previousPageId !== null){
-
-            }
-            if(log.parentPageId !== null){
-
-            }*/
-            //log.roadDatetime;
-
+            console.log("log.title" + log.title);
+            console.log("log.step" + log.step);
+            strOutput = strOutput + getMDformat(log.title, log.step, log);
         });
    });
-
-
-    /*var allDate= objLog.filter(function(item, index){
-        if (item.date == "City" ) return true;
-    });
-    for( var i = 0; i < all_cities.length; i++ ){
-        console.log(all_cities[i].Name);
-    }
-
-    let objPage = objLogArray.find((v) => v.url == strPageUrl);
-        if(typeof objPage !== 'undefined'){
-            intPageId = Number(objPage.id); 
-        }*/
+   console.log("aaaaaaaaa");
+   console.log(strOutput);
     return strOutput;
 }
-
-const getMDformat = (strLine, intStep, strLink) =>{ // line, step, link
+const getMDformat = (strTitle, intStep, objLog) =>{ // title, step, object
     const strSharp = "#";
     let strPrefix = "";
-    let strLineOutput = "";
+    let strOutput = "";
+    console.log("intStep" + intStep);
     for (var i = 0; i < intStep; i++){
         strPrefix = strPrefix + strSharp;
     }
-    if(typeof strLink === 'undefined'){
-        strLineOutput = strPrefix + " " + strLine + "\n";
+    console.log("strPrefix" + strPrefix);
+    if(typeof objLog === 'undefined'){
+        strOutput = strPrefix + " " + strTitle + "\n";
     }else{
-        strLineOutput = strPrefix + " [" + strLine + "](" + strLink + ")\n";
+        strOutput = strPrefix + " [" + strTitle + "](" + objLog.url + ")\n";
+        if (typeof objLog.child !== 'undefined'){
+            const arrayChildLog = objLog.child;
+            arrayChildLog.forEach(function (log, index, data){
+                strOutput = strOutput + getMDformat(log.title, log.step, log);
+            });
+            
+        }
     }
-    return strLineOutput;
+    return strOutput;
 }

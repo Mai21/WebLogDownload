@@ -111,7 +111,7 @@ $(document).ready(async function(){
         if(typeof strlogStorage !== 'undefined'){
             objLogStorage = JSON.parse(strlogStorage);
             let objTodayLogStorage = objLogStorage.find((v) => v.date == jsonDate);
-            //データがない場合の初期化
+            // if no data today, initialise
             if(!objTodayLogStorage){
                 // new log today
                 objLogStorage.push({"date": jsonDate, "log" : [logJson]});
